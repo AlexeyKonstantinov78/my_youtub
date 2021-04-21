@@ -1,5 +1,4 @@
 // тренды
-const API_KEY = 'ss';
 
 const trending = [
     {

@@ -1,4 +1,6 @@
-const gloAcademyList = document.querySelector('.glo-academy-list');
+const gloAcademyList = document.querySelector('.glo-academy-list'),
+    trendingList = document.querySelector('.trending-list'),
+    musicList = document.querySelector('.music-list');
 
 const createCard = (dataVideo) => {
     console.log(dataVideo);
@@ -8,6 +10,13 @@ const createCard = (dataVideo) => {
         titleVideo = dataVideo.snippet.title,
         dateVideo = dataVideo.snippet.publishedAt,
         channelTitle = dataVideo.snippet.channelTitle;
+    let viewCount = ''; //statistics.viewCount
+
+    if (dateVideo.hasOwnProperty('statistics')) {
+        console.log('есть');
+        viewCount = dateVideo.statistics.viewCount;
+    }
+
 
     const card = document.createElement('div');
     card.classList.add('video-card');
@@ -20,6 +29,7 @@ const createCard = (dataVideo) => {
             <h3 class="video-title">${titleVideo}</h3>
             <div class="video-info">
                 <span class="video-counter">
+                    <span class="video-views">${viewCount}</span>
                     <span class="video-date">${dateVideo}</span>
                 </span>
                 <span class="video-channel">${channelTitle}</span>
@@ -36,3 +46,5 @@ const createList = (wrapper, listVideo) => {
 };
 
 createList(gloAcademyList, gloAcademy);
+createList(trendingList, trending);
+createList(musicList, music);
