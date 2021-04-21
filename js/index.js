@@ -31,10 +31,6 @@ const createCard = (dataVideo) => {
 
 const createList = (wrapper, listVideo) => {
     wrapper.textContent = '';
-    // for (let i = 0; i < listVideo.length; i++) {
-    //     wrapper.textContent += listVideo[i];
-
-    // }
 
     listVideo.forEach(item => wrapper.append(createCard(item)));
 };
