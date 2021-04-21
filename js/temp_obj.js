@@ -1,4 +1,5 @@
 // тренды
+const API_KEY = '';
 
 const trending = [
     {
