@@ -11,9 +11,8 @@ const createCard = (dataVideo) => {
         titleVideo = dataVideo.snippet.title,
         dateVideo = dataVideo.snippet.publishedAt,
         channelTitle = dataVideo.snippet.channelTitle,
-        viewCount = typeof dataVideo.statistics === "object" ? dataVideo.statistics.viewCount : '';
-
-    console.log(typeof dataVideo.statistics);
+        viewCount = dataVideo.statistics?.viewCount;
+    // viewCount = typeof dataVideo.statistics === "object" ? dataVideo.statistics.viewCount + ' views' : '';
 
     const card = document.createElement('div');
     card.classList.add('video-card');
@@ -26,8 +25,8 @@ const createCard = (dataVideo) => {
             <h3 class="video-title">${titleVideo}</h3>
             <div class="video-info">
                 <span class="video-counter">
-                    <span class="video-views">${viewCount}</span>
-                    <span class="video-date">${new Date(dateVideo).toLocaleString("RU-ru")}</span>
+                    ${viewCount ? `<span class="video-views">${viewCount} views</span>` : ''}                    
+                    <span class="video-date">${new Date(dateVideo).toLocaleString("ru-RU")}</span>
                 </span>
                 <span class="video-channel">${channelTitle}</span>
             </div>
