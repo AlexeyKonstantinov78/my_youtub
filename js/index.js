@@ -1,10 +1,12 @@
 
+
 const gloAcademyList = document.querySelector('.glo-academy-list'),
     trendingList = document.querySelector('.trending-list'),
     musicList = document.querySelector('.music-list');
 
+
 const createCard = (dataVideo) => {
-    console.log(dataVideo);
+    //console.log(dataVideo);
 
     const imgUrl = dataVideo.snippet.thumbnails.high.url,
         videoId = typeof dataVideo.id === 'string' ? dataVideo.id : dataVideo.id.videoId,
@@ -41,6 +43,57 @@ const createList = (wrapper, listVideo) => {
     listVideo.forEach(item => wrapper.append(createCard(item)));
 };
 
+
 createList(gloAcademyList, gloAcademy);
 createList(trendingList, trending);
 createList(musicList, music);
+
+//yotubAPI https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
+// https://developers.google.com/youtube/v3/docs/channels/list
+
+const authBtn = document.querySelector('.auth-btn'),
+    userAvatar = document.querySelector('.user-avatar');
+
+const handleAuth = () => {
+    //gapi.auth2.getAuthInstance();
+    console.log(gapi.auth2);
+}
+
+const handleSignout = () => {
+
+}
+
+const updateStatusAuth = (data) => {
+    console.log(data);
+    data.isSignedIn.listen(() => {
+        updateStatusAuth();
+    });
+
+    if (data.isSignedIn.get()) {
+        const userData = data.currentUser.get().getBasicProfile();
+
+    } else {
+
+    }
+}
+
+// необходимо включить стороние coocke иначе не дает авторизоватся
+function initClient() {
+    gapi.client.init({
+        'apiKey': API_KEY,
+        'clientId': CLIENT_ID,
+        'scope': 'https://www.googleapis.com/auth/drive.metadata.readonly',
+        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+    }).then(() => {
+        updateStatusAuth(gapi.auth2.getAuthInstance());
+    }).catch(err => {
+        authBtn.removeEventListener('click', handleAuth);
+        userAvatar.removeEventListener('click', handleSignout);
+        alert('Авторизация не возможна!');
+    });
+}
+
+gapi.load('client:auth2', initClient);
+
+authBtn.addEventListener('click', handleAuth);
+userAvatar.addEventListener('click', handleSignout);
