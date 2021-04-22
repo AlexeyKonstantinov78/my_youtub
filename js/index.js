@@ -1,3 +1,4 @@
+
 const gloAcademyList = document.querySelector('.glo-academy-list'),
     trendingList = document.querySelector('.trending-list'),
     musicList = document.querySelector('.music-list');
@@ -6,17 +7,13 @@ const createCard = (dataVideo) => {
     console.log(dataVideo);
 
     const imgUrl = dataVideo.snippet.thumbnails.high.url,
-        videoId = dataVideo.id.videoId,
+        videoId = typeof dataVideo.id === 'string' ? dataVideo.id : dataVideo.id.videoId,
         titleVideo = dataVideo.snippet.title,
         dateVideo = dataVideo.snippet.publishedAt,
-        channelTitle = dataVideo.snippet.channelTitle;
-    let viewCount = ''; //statistics.viewCount
+        channelTitle = dataVideo.snippet.channelTitle,
+        viewCount = typeof dataVideo.statistics === "object" ? dataVideo.statistics.viewCount : '';
 
-    if (dateVideo.hasOwnProperty('statistics')) {
-        console.log('есть');
-        viewCount = dateVideo.statistics.viewCount;
-    }
-
+    console.log(typeof dataVideo.statistics);
 
     const card = document.createElement('div');
     card.classList.add('video-card');
@@ -30,7 +27,7 @@ const createCard = (dataVideo) => {
             <div class="video-info">
                 <span class="video-counter">
                     <span class="video-views">${viewCount}</span>
-                    <span class="video-date">${dateVideo}</span>
+                    <span class="video-date">${new Date(dateVideo).toLocaleString("RU-ru")}</span>
                 </span>
                 <span class="video-channel">${channelTitle}</span>
             </div>
