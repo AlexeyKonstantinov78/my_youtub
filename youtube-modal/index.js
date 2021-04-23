@@ -23,7 +23,7 @@
 	const animation = function (elem, prop, cb) {
 		const count = prop.count;
 		let counter = 0
-		if(prop.start) {
+		if (prop.start) {
 			prop.start.forEach(item => {
 				elem.style[item[0]] = item[1]
 			})
@@ -36,7 +36,7 @@
 			const min = Math.min(from, to);
 			const step = (max - min) / count;
 			console.log(min === to)
-			allAnimation.push({style, from, to, step, reverse: min === to})
+			allAnimation.push({ style, from, to, step, reverse: min === to })
 		});
 
 
@@ -59,7 +59,7 @@
 
 				requestAnimationFrame(rafAnimation);
 			} else {
-				if(prop.end) {
+				if (prop.end) {
 					prop.end.forEach(item => {
 						elem.style[item[0]] = item[1]
 					})
@@ -135,10 +135,10 @@ function init() {
 	function closeYoutubeModal() {
 
 		animation(overlay, {
-				end: [['display', 'none']],
-				anim: [['opacity', 1, 0]],
-				count: 20,
-			},
+			end: [['display', 'none']],
+			anim: [['opacity', 1, 0]],
+			count: 20,
+		},
 			() => {
 				overlay.textContent = "";
 			}
@@ -155,25 +155,25 @@ function init() {
 
 
 	const openYoutubeModal = e => {
-			e.preventDefault();
-			const target = e.target.closest('.youtube-modal');
-			if (!target) return;
+		e.preventDefault();
+		const target = e.target.closest('.youtube-modal');
+		if (!target) return;
 
-			const href = target.href;
-			const search = href.includes('youtube');
-			let idVideo = search ? href.match(/(\?|&)v=([^&]+)/)[2] : href.match(/(\.be\/)([^&]+)/)[2];
+		const href = target.href;
+		const search = href.includes('youtube');
+		let idVideo = search ? href.match(/(\?|&)v=([^&]+)/)[2] : href.match(/(\.be\/)([^&]+)/)[2];
 
-			if (idVideo.length === 0) return;
+		if (idVideo.length === 0) return;
 
 
-			animation(overlay, {
-					start: [['display', 'block']],
-					anim: [['opacity', 0, 1]],
-					count: 20,
-				}
-			);
+		animation(overlay, {
+			start: [['display', 'block']],
+			anim: [['opacity', 0, 1]],
+			count: 20,
+		}
+		);
 
-			overlay.insertAdjacentHTML('beforeend', `
+		overlay.insertAdjacentHTML('beforeend', `
 			<div id="youtube-modal-loading">Loading...</div>
 			<div id="youtube-modal-close">&#10006;</div>
 			<div id="youtube-modal-container">
@@ -186,13 +186,13 @@ function init() {
 		`)
 
 
-			sizeVideo();
-			sizeContainer();
+		sizeVideo();
+		sizeContainer();
 
-			window.addEventListener("optimizedResize", sizeYoutubeModal);
-			document.addEventListener('keyup', closeContainerEsc);
-		}
-	;
+		window.addEventListener("optimizedResize", sizeYoutubeModal);
+		document.addEventListener('keyup', closeContainerEsc);
+	}
+		;
 
 
 	overlay.addEventListener("click", closeYoutubeModal);
