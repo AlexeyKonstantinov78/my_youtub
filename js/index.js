@@ -55,13 +55,13 @@ const authBtn = document.querySelector('.auth-btn'),
 
 
 const handleSuccessAuthent = (data) => {
-    console.log(data);
+
     authBtn.classList.add('hide');
     userAvatar.classList.remove('hide');
     userAvatar.src = data.getImageUrl();
     userAvatar.alt = data.getName();
 
-
+    getChannel();
 }
 
 const handleNoAuth = () => {
@@ -73,7 +73,7 @@ const handleNoAuth = () => {
 
 const handleAuth = () => {
     gapi.auth2.getAuthInstance().signIn();
-    console.log(gapi.auth2);
+
 }
 
 const handleSignout = () => {
@@ -116,3 +116,12 @@ function initClient() {
 
 gapi.load('client:auth2', initClient);
 
+// https://www.youtube.com/channel/UCVswRUcKC-M35RzgPRv8qUg запрос на получение данных канала id UCVswRUcKC-M35RzgPRv8qUg
+const getChannel = () => {
+    gapi.client.youtube.channels.list({
+        part: 'snippet, statistics',
+        id: 'UCVswRUcKC-M35RzgPRv8qUg',
+    }).execute((response) => {
+        console.log(response);
+    });
+}
