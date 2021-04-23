@@ -4,7 +4,6 @@ const gloAcademyList = document.querySelector('.glo-academy-list'),
     trendingList = document.querySelector('.trending-list'),
     musicList = document.querySelector('.music-list');
 
-
 const createCard = (dataVideo) => {
     //console.log(dataVideo);
 
@@ -54,26 +53,42 @@ createList(musicList, music);
 const authBtn = document.querySelector('.auth-btn'),
     userAvatar = document.querySelector('.user-avatar');
 
+
+const handleSuccessAuthent = (data) => {
+    console.log(data);
+    authBtn.classList.add('hide');
+    userAvatar.classList.remove('hide');
+    userAvatar.src = data.yJ;
+    userAvatar.alt = data.Te;
+}
+
+const handleNoAuth = () => {
+    authBtn.classList.remove('hide');
+    userAvatar.classList.add('hide');
+    userAvatar.src = '';
+    userAvatar.alt = '';
+}
+
 const handleAuth = () => {
-    //gapi.auth2.getAuthInstance();
+    gapi.auth2.getAuthInstance().signIn();
     console.log(gapi.auth2);
 }
 
 const handleSignout = () => {
-
+    gapi.auth2.getAuthInstance().signOut();
 }
 
 const updateStatusAuth = (data) => {
-    console.log(data);
+
     data.isSignedIn.listen(() => {
-        updateStatusAuth();
+        updateStatusAuth(data);
     });
 
     if (data.isSignedIn.get()) {
         const userData = data.currentUser.get().getBasicProfile();
-
+        handleSuccessAuthent(userData);
     } else {
-
+        handleNoAuth();
     }
 }
 
@@ -82,18 +97,19 @@ function initClient() {
     gapi.client.init({
         'apiKey': API_KEY,
         'clientId': CLIENT_ID,
-        'scope': 'https://www.googleapis.com/auth/drive.metadata.readonly',
-        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+        'scope': 'https://www.googleapis.com/auth/youtube.readonly',
+        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
     }).then(() => {
         updateStatusAuth(gapi.auth2.getAuthInstance());
+        authBtn.addEventListener('click', handleAuth);
+        userAvatar.addEventListener('click', handleSignout);
     }).catch(err => {
         authBtn.removeEventListener('click', handleAuth);
         userAvatar.removeEventListener('click', handleSignout);
         alert('Авторизация не возможна!');
+        console.log(err);
     });
 }
 
 gapi.load('client:auth2', initClient);
 
-authBtn.addEventListener('click', handleAuth);
-userAvatar.addEventListener('click', handleSignout);
