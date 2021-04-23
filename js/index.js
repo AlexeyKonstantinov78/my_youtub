@@ -58,8 +58,10 @@ const handleSuccessAuthent = (data) => {
     console.log(data);
     authBtn.classList.add('hide');
     userAvatar.classList.remove('hide');
-    userAvatar.src = data.yJ;
-    userAvatar.alt = data.Te;
+    userAvatar.src = data.getImageUrl();
+    userAvatar.alt = data.getName();
+
+
 }
 
 const handleNoAuth = () => {
@@ -103,6 +105,7 @@ function initClient() {
         updateStatusAuth(gapi.auth2.getAuthInstance());
         authBtn.addEventListener('click', handleAuth);
         userAvatar.addEventListener('click', handleSignout);
+
     }).catch(err => {
         authBtn.removeEventListener('click', handleAuth);
         userAvatar.removeEventListener('click', handleSignout);
