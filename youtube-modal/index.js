@@ -43,7 +43,7 @@
 		const rafAnimation = function () {
 
 			allAnimation.forEach((item) => {
-				console.log(item.from, item.step)
+				// console.log(item.from, item.step)
 				if (item.reverse) {
 					item.from -= item.step
 				} else {
@@ -54,7 +54,7 @@
 			})
 
 			counter++;
-			console.log(allAnimation)
+			// console.log(allAnimation)
 			if (counter < count) {
 
 				requestAnimationFrame(rafAnimation);
@@ -155,7 +155,7 @@ function init() {
 
 
 	const openYoutubeModal = e => {
-		e.preventDefault();
+
 		const target = e.target.closest('.youtube-modal');
 		if (!target) return;
 
@@ -165,6 +165,7 @@ function init() {
 
 		if (idVideo.length === 0) return;
 
+		e.preventDefault();
 
 		animation(overlay, {
 			start: [['display', 'block']],

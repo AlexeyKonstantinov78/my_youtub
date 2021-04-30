@@ -2,7 +2,14 @@
 
 const gloAcademyList = document.querySelector('.glo-academy-list'),
     trendingList = document.querySelector('.trending-list'),
-    musicList = document.querySelector('.music-list');
+    musicList = document.querySelector('.music-list'),
+    navMenuMore = document.querySelector('.nav-menu-more'),
+    showMore = document.querySelector('.show-more');
+
+showMore.addEventListener('click', (event) => {
+    event.preventDefault();
+    navMenuMore.classList.toggle('nav-menu-more-show');
+});
 
 const createCard = (dataVideo) => {
     //console.log(dataVideo);
@@ -43,9 +50,7 @@ const createList = (wrapper, listVideo) => {
 };
 
 
-createList(gloAcademyList, gloAcademy);
-createList(trendingList, trending);
-createList(musicList, music);
+
 
 //yotubAPI https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
 // https://developers.google.com/youtube/v3/docs/channels/list
@@ -60,8 +65,6 @@ const handleSuccessAuthent = (data) => {
     userAvatar.classList.remove('hide');
     userAvatar.src = data.getImageUrl();
     userAvatar.alt = data.getName();
-
-    getChannel();
 }
 
 const handleNoAuth = () => {
@@ -105,8 +108,7 @@ function initClient() {
         updateStatusAuth(gapi.auth2.getAuthInstance());
         authBtn.addEventListener('click', handleAuth);
         userAvatar.addEventListener('click', handleSignout);
-
-    }).catch(err => {
+    }).then(loadScreen).catch(err => {
         authBtn.removeEventListener('click', handleAuth);
         userAvatar.removeEventListener('click', handleSignout);
         alert('Авторизация не возможна!');
@@ -125,3 +127,53 @@ const getChannel = () => {
         console.log(response);
     });
 }
+
+const requestVideos = (channelId, callback, maxResults = 6) => {
+    gapi.client.youtube.search.list({
+        part: 'snippet',
+        channelId,
+        maxResults,
+        order: 'date',
+    }).execute((response) => {
+        callback(response.items);
+    });
+
+};
+
+const requestTrending = (callback, maxResults = 6) => {
+    gapi.client.youtube.videos.list({
+        part: 'snippet, statistics',
+        chart: 'mostPopular',
+        regionCode: 'RU',
+        maxResults,
+    }).execute((response) => {
+        callback(response.items);
+    });
+};
+
+const requestMusic = (callback, maxResults = 6) => {
+    gapi.client.youtube.videos.list({
+        part: 'snippet, statistics',
+        chart: 'mostPopular',
+        regionCode: 'RU',
+        maxResults,
+        videoCategoryId: '10',
+    }).execute((response) => {
+        callback(response.items);
+    });
+};
+
+const loadScreen = () => {
+    requestVideos('UCVswRUcKC-M35RzgPRv8qUg', data => {
+        createList(gloAcademyList, data);
+    });
+
+    requestTrending(data => {
+        createList(trendingList, data);
+    });
+
+    requestMusic(data => {
+        createList(musicList, data);
+    });
+
+};
