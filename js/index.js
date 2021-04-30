@@ -4,12 +4,8 @@ const gloAcademyList = document.querySelector('.glo-academy-list'),
     trendingList = document.querySelector('.trending-list'),
     musicList = document.querySelector('.music-list'),
     navMenuMore = document.querySelector('.nav-menu-more'),
-    showMore = document.querySelector('.show-more');
-
-showMore.addEventListener('click', (event) => {
-    event.preventDefault();
-    navMenuMore.classList.toggle('nav-menu-more-show');
-});
+    showMore = document.querySelector('.show-more'),
+    formSearch = document.querySelector('.form-search');
 
 const createCard = (dataVideo) => {
     //console.log(dataVideo);
@@ -157,7 +153,19 @@ const requestMusic = (callback, maxResults = 6) => {
         chart: 'mostPopular',
         regionCode: 'RU',
         maxResults,
-        videoCategoryId: '10',
+        videoCategoryId: '10',  // категори для музыки 
+    }).execute((response) => {
+        callback(response.items);
+    });
+};
+
+//запрос на поиска
+const requestSearch = (searchText, callback, maxResults = 12) => {
+    gapi.client.youtube.search.list({
+        part: 'snippet',
+        q: searchText,
+        maxResults,
+        order: 'relevance',
     }).execute((response) => {
         callback(response.items);
     });
@@ -177,3 +185,18 @@ const loadScreen = () => {
     });
 
 };
+
+showMore.addEventListener('click', event => {
+    event.preventDefault();
+    navMenuMore.classList.toggle('nav-menu-more-show');
+});
+
+formSearch.addEventListener('submit', event => {
+    event.preventDefault();
+    console.log(formSearch.elements.search.value); //получаем даные из строки поиска
+    const value = formSearch.elements.search.value
+    requestSearch(value, data => {
+        console.log(data);
+        createList(gloAcademyList, data);
+    });
+});
