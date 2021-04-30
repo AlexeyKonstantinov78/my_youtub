@@ -171,6 +171,17 @@ const requestSearch = (searchText, callback, maxResults = 12) => {
     });
 };
 
+const requestSubscriptions = (callback, maxResults = 10) => {
+    gapi.client.youtube.subscriptions.list({
+        part: 'snippet',
+        mine: 'true',
+        maxResults,
+        order: 'unread',
+    }).execute((response) => {
+        console.log(response);
+    });
+};
+
 const loadScreen = () => {
     requestVideos('UCVswRUcKC-M35RzgPRv8qUg', data => {
         createList(gloAcademyList, data);
@@ -184,6 +195,7 @@ const loadScreen = () => {
         createList(musicList, data);
     });
 
+    requestSubscriptions(() => { });
 };
 
 showMore.addEventListener('click', event => {
