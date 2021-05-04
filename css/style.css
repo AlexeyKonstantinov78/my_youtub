@@ -18,6 +18,10 @@ ul{
   padding: 0;
 }
 
+.preload{
+  text-align: center;
+}
+
 .hide {
   display: none !important;
 }

@@ -7,7 +7,8 @@
 const content = document.querySelector('.content');
 navMenuMore = document.querySelector('.nav-menu-more'),
     showMore = document.querySelector('.show-more'),
-    formSearch = document.querySelector('.form-search');
+    formSearch = document.querySelector('.form-search'),
+    subscriptionsList = document.querySelector('.subscriptions-list');
 
 const createCard = (dataVideo) => {
     //console.log(dataVideo);
@@ -41,6 +42,7 @@ const createCard = (dataVideo) => {
     return card;
 }
 
+
 const createList = (listVideo, title, clear) => {
 
     const channel = document.createElement('section');
@@ -66,6 +68,22 @@ const createList = (listVideo, title, clear) => {
 };
 
 
+const createSubList = listVideo => {
+    subscriptionsList.textContent = '';
+    listVideo.forEach(item => {
+        const html = `
+        <li class="nav-item">
+            <a href="#" class="nav-link" data-channel-id="${item.snippet.resourceId.channelId}">
+                <img src="${item.snippet.thumbnails.high.url}" alt="Photo: ${item.snippet.title}" class="nav-image">
+                <span class="nav-text">${item.snippet.title}</span>
+            </a>
+        </li>
+    `;
+        subscriptionsList.insertAdjacentHTML('beforeend', html);
+    });
+};
+
+
 //yotubAPI https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
 // https://developers.google.com/youtube/v3/docs/channels/list
 
@@ -79,6 +97,8 @@ const handleSuccessAuthent = (data) => {
     userAvatar.classList.remove('hide');
     userAvatar.src = data.getImageUrl();
     userAvatar.alt = data.getName();
+
+    requestSubscriptions(createSubList);
 }
 
 const handleNoAuth = () => {
@@ -196,7 +216,7 @@ const requestSubscriptions = (callback, maxResults = 10) => {
         maxResults,
         order: 'unread',
     }).execute((response) => {
-        console.log(response);
+        callback(response.items);
     });
 };
 
@@ -204,7 +224,8 @@ const loadScreen = () => {
     content.textContent = '';
 
     requestVideos('UCVswRUcKC-M35RzgPRv8qUg', data => {
-        createList(data, 'Glo Academy');
+
+        createList(data, data[0].snippet.channelTitle);
 
         requestTrending(data => {
             createList(data, 'Популярное видео');
@@ -214,8 +235,6 @@ const loadScreen = () => {
             });
         });
     });
-
-    //requestSubscriptions(() => { });
 };
 
 showMore.addEventListener('click', event => {
@@ -228,7 +247,27 @@ formSearch.addEventListener('submit', event => {
     console.log(formSearch.elements.search.value); //получаем даные из строки поиска
     const value = formSearch.elements.search.value
     requestSearch(value, data => {
-        console.log(data);
+
         createList(data, 'Результат поиска', true);
+    });
+});
+
+subscriptionsList.addEventListener('click', event => {
+    event.preventDefault();
+    const target = event.target,
+        linkChannel = target.closest('.nav-link');
+
+    content.textContent = '';
+    requestVideos(linkChannel.dataset.channelId, data => {
+
+        createList(data, data[0].snippet.channelTitle);
+
+        requestTrending(data => {
+            createList(data, 'Популярное видео');
+
+            requestMusic(data => {
+                createList(data, 'Популярная музыка');
+            });
+        });
     });
 });
