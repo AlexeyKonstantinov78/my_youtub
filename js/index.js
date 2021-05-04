@@ -1,9 +1,11 @@
 
 
-const gloAcademyList = document.querySelector('.glo-academy-list'),
-    trendingList = document.querySelector('.trending-list'),
-    musicList = document.querySelector('.music-list'),
-    navMenuMore = document.querySelector('.nav-menu-more'),
+// const gloAcademyList = document.querySelector('.glo-academy-list'),
+//     trendingList = document.querySelector('.trending-list'),
+//     musicList = document.querySelector('.music-list'),
+
+const content = document.querySelector('.content');
+navMenuMore = document.querySelector('.nav-menu-more'),
     showMore = document.querySelector('.show-more'),
     formSearch = document.querySelector('.form-search');
 
@@ -18,7 +20,7 @@ const createCard = (dataVideo) => {
         viewCount = dataVideo.statistics?.viewCount;
     // viewCount = typeof dataVideo.statistics === "object" ? dataVideo.statistics.viewCount + ' views' : '';
 
-    const card = document.createElement('div');
+    const card = document.createElement('li');
     card.classList.add('video-card');
     card.innerHTML = `
             <div class="video-thumb">
@@ -39,13 +41,29 @@ const createCard = (dataVideo) => {
     return card;
 }
 
-const createList = (wrapper, listVideo) => {
-    wrapper.textContent = '';
+const createList = (listVideo, title, clear) => {
+
+    const channel = document.createElement('section');
+    channel.classList.add('channel');
+
+    if (clear) {
+        content.textContent = '';
+    }
+
+    if (title) {
+        const header = document.createElement('h2');
+        header.textContent = title;
+        channel.insertAdjacentElement('afterbegin', header);
+    }
+
+    const wrapper = document.createElement('ul');
+    wrapper.classList.add('video-list');
+    channel.insertAdjacentElement('beforeend', wrapper);
 
     listVideo.forEach(item => wrapper.append(createCard(item)));
+
+    content.insertAdjacentElement('beforeend', channel);
 };
-
-
 
 
 //yotubAPI https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
@@ -183,19 +201,21 @@ const requestSubscriptions = (callback, maxResults = 10) => {
 };
 
 const loadScreen = () => {
+    content.textContent = '';
+
     requestVideos('UCVswRUcKC-M35RzgPRv8qUg', data => {
-        createList(gloAcademyList, data);
+        createList(data, 'Glo Academy');
+
+        requestTrending(data => {
+            createList(data, 'Популярное видео');
+
+            requestMusic(data => {
+                createList(data, 'Популярная музыка');
+            });
+        });
     });
 
-    requestTrending(data => {
-        createList(trendingList, data);
-    });
-
-    requestMusic(data => {
-        createList(musicList, data);
-    });
-
-    requestSubscriptions(() => { });
+    //requestSubscriptions(() => { });
 };
 
 showMore.addEventListener('click', event => {
@@ -209,6 +229,6 @@ formSearch.addEventListener('submit', event => {
     const value = formSearch.elements.search.value
     requestSearch(value, data => {
         console.log(data);
-        createList(gloAcademyList, data);
+        createList(data, 'Результат поиска', true);
     });
 });
