@@ -4,11 +4,12 @@
 //     trendingList = document.querySelector('.trending-list'),
 //     musicList = document.querySelector('.music-list'),
 
-const content = document.querySelector('.content');
-navMenuMore = document.querySelector('.nav-menu-more'),
+const content = document.querySelector('.content'),
+    navMenuMore = document.querySelector('.nav-menu-more'),
     showMore = document.querySelector('.show-more'),
     formSearch = document.querySelector('.form-search'),
-    subscriptionsList = document.querySelector('.subscriptions-list');
+    subscriptionsList = document.querySelector('.subscriptions-list'),
+    navLinkLiked = document.querySelectorAll('.nav-link-liked');
 
 const createCard = (dataVideo) => {
     //console.log(dataVideo);
@@ -32,8 +33,8 @@ const createCard = (dataVideo) => {
             <h3 class="video-title">${titleVideo}</h3>
             <div class="video-info">
                 <span class="video-counter">
-                    ${viewCount ? `<span class="video-views">${viewCount} views</span>` : ''}                    
-                    <span class="video-date">${new Date(dateVideo).toLocaleString("ru-RU")}</span>
+                    ${viewCount ? `<span class="video-views">${getViewer(viewCount)}</span>` : ''}                    
+                    <span class="video-date">${getDate(dateVideo)}</span>
                 </span>
                 <span class="video-channel">${channelTitle}</span>
             </div>
@@ -73,7 +74,7 @@ const createSubList = listVideo => {
     listVideo.forEach(item => {
         const html = `
         <li class="nav-item">
-            <a href="#" class="nav-link" data-channel-id="${item.snippet.resourceId.channelId}">
+            <a href="#" class="nav-link" data-channel-id="${item.snippet.resourceId.channelId}" data-title="${item.snippet.title}">
                 <img src="${item.snippet.thumbnails.high.url}" alt="Photo: ${item.snippet.title}" class="nav-image">
                 <span class="nav-text">${item.snippet.title}</span>
             </a>
@@ -81,6 +82,39 @@ const createSubList = listVideo => {
     `;
         subscriptionsList.insertAdjacentHTML('beforeend', html);
     });
+};
+
+
+// функция перевода времени в дней
+const getDate = (date) => {
+
+    const currentDay = Date.parse(new Date()),
+        days = Math.round((currentDay - Date.parse(new Date(date))) / 86400000);
+
+    if (days > 30) {
+        if (days > 60) {
+            return Math.round(days / 30) + ' month ago';
+        }
+        return 'One month ago';
+    }
+
+    if (days > 1) {
+        return Math.round(days) + ' days ago';
+    }
+    return 'One day ago';
+};
+
+// функция количества просмотров
+const getViewer = count => {
+    if (count >= 1000000) {
+        return Math.round(count / 1000000) + ' M views';
+    }
+
+    if (count >= 1000) {
+        return Math.round(count / 1000) + ' K views';
+    }
+
+    return count + ' views';
 };
 
 
@@ -169,7 +203,9 @@ const requestVideos = (channelId, callback, maxResults = 6) => {
         maxResults,
         order: 'date',
     }).execute((response) => {
+        console.log();
         callback(response.items);
+
     });
 
 };
@@ -220,12 +256,23 @@ const requestSubscriptions = (callback, maxResults = 10) => {
     });
 };
 
+const requestliked = (callback, maxResults = 5) => {
+    console.log(maxResults);
+    gapi.client.youtube.videos.list({
+        part: 'contentDetails, snippet, statistics',
+        maxResults,
+        myRating: 'like',
+    }).execute((response) => {
+        callback(response.items);
+    });
+};
+
 const loadScreen = () => {
     content.textContent = '';
 
     requestVideos('UCVswRUcKC-M35RzgPRv8qUg', data => {
 
-        createList(data, data[0].snippet.channelTitle);
+        createList(data, 'GLO Academy');
 
         requestTrending(data => {
             createList(data, 'Популярное видео');
@@ -255,19 +302,23 @@ formSearch.addEventListener('submit', event => {
 subscriptionsList.addEventListener('click', event => {
     event.preventDefault();
     const target = event.target,
-        linkChannel = target.closest('.nav-link');
+        linkChannel = target.closest('.nav-link'),
+        channelId = linkChannel.dataset.channelId,
+        title = linkChannel.dataset.title;
 
-    content.textContent = '';
-    requestVideos(linkChannel.dataset.channelId, data => {
+    requestVideos(channelId, data => {
 
-        createList(data, data[0].snippet.channelTitle);
+        createList(data, title, true);
 
-        requestTrending(data => {
-            createList(data, 'Популярное видео');
+    }, 12);
+});
 
-            requestMusic(data => {
-                createList(data, 'Популярная музыка');
-            });
-        });
+navLinkLiked.forEach(elem => {
+    elem.addEventListener('click', event => {
+        event.preventDefault();
+        requestliked(data => {
+            console.log(data);
+            createList(data, 'Like', true);
+        }, 9);
     });
 });
