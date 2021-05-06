@@ -9,10 +9,13 @@ const content = document.querySelector('.content'),
     showMore = document.querySelector('.show-more'),
     formSearch = document.querySelector('.form-search'),
     subscriptionsList = document.querySelector('.subscriptions-list'),
-    navLinkLiked = document.querySelectorAll('.nav-link-liked');
+    navLinkLiked = document.querySelectorAll('.nav-link-liked'),
+    navLinkSubscriptions = document.querySelectorAll('.nav-link-subscriptions'),
+    navLinkTrending = document.querySelectorAll('.nav-link-trending'),
+    navLinkMusic = document.querySelector('.nav-link-music'),
+    navLinkGames = document.querySelector('.nav-link-games');
 
 const createCard = (dataVideo) => {
-    //console.log(dataVideo);
 
     const imgUrl = dataVideo.snippet.thumbnails.high.url,
         videoId = typeof dataVideo.id === 'string' ? dataVideo.id : dataVideo.id.videoId,
@@ -44,7 +47,7 @@ const createCard = (dataVideo) => {
 }
 
 
-const createList = (listVideo, title, clear) => {
+const createList = (listVideo, title, clear, subscrip) => {
 
     const channel = document.createElement('section');
     channel.classList.add('channel');
@@ -60,14 +63,41 @@ const createList = (listVideo, title, clear) => {
     }
 
     const wrapper = document.createElement('ul');
-    wrapper.classList.add('video-list');
+    if (subscrip) {
+        wrapper.classList.add('subscriptions-list-content');
+    } else {
+        wrapper.classList.add('video-list');
+    }
+    // wrapper.classList.add('video-list');
     channel.insertAdjacentElement('beforeend', wrapper);
 
-    listVideo.forEach(item => wrapper.append(createCard(item)));
+    if (subscrip) {
+        listVideo.forEach(item => wrapper.append(createListSubscription(item)));
+    } else {
+        listVideo.forEach(item => wrapper.append(createCard(item)));
+    }
+
 
     content.insertAdjacentElement('beforeend', channel);
+
+    if (subscrip) {
+        loadListSubcript();
+    }
 };
 
+const createListSubscription = listVideo => {
+
+    const html = document.createElement('li');
+    html.classList.add('nav-item');
+    html.innerHTML = `
+                    <a href="#" class="nav-link" data-channel-id="${listVideo.snippet.resourceId.channelId}" data-title="${listVideo.snippet.title}">
+                        <img src="${listVideo.snippet.thumbnails.high.url}" alt="Photo: ${listVideo.snippet.title}" class="nav-image">
+                        <span class="nav-text">${listVideo.snippet.title}</span>
+                    </a>
+                    `;
+
+    return html;
+};
 
 const createSubList = listVideo => {
     subscriptionsList.textContent = '';
@@ -203,7 +233,7 @@ const requestVideos = (channelId, callback, maxResults = 6) => {
         maxResults,
         order: 'date',
     }).execute((response) => {
-        console.log();
+
         callback(response.items);
 
     });
@@ -221,6 +251,7 @@ const requestTrending = (callback, maxResults = 6) => {
     });
 };
 
+// музыка
 const requestMusic = (callback, maxResults = 6) => {
     gapi.client.youtube.videos.list({
         part: 'snippet, statistics',
@@ -228,6 +259,18 @@ const requestMusic = (callback, maxResults = 6) => {
         regionCode: 'RU',
         maxResults,
         videoCategoryId: '10',  // категори для музыки 
+    }).execute((response) => {
+        callback(response.items);
+    });
+};
+
+const requestGames = (callback, maxResults = 6) => {
+    gapi.client.youtube.videos.list({
+        part: 'snippet, statistics',
+        chart: 'mostPopular',
+        regionCode: 'RU',
+        maxResults,
+        videoCategoryId: '20',  // категори для игр 
     }).execute((response) => {
         callback(response.items);
     });
@@ -257,7 +300,7 @@ const requestSubscriptions = (callback, maxResults = 10) => {
 };
 
 const requestliked = (callback, maxResults = 5) => {
-    console.log(maxResults);
+
     gapi.client.youtube.videos.list({
         part: 'contentDetails, snippet, statistics',
         maxResults,
@@ -284,6 +327,24 @@ const loadScreen = () => {
     });
 };
 
+const loadListSubcript = () => {
+    const subscriptionsListContent = document.querySelector('.subscriptions-list-content');
+
+    subscriptionsListContent.addEventListener('click', event => {
+        event.preventDefault();
+        const target = event.target,
+            linkChannel = target.closest('.nav-link'),
+            channelId = linkChannel.dataset.channelId,
+            title = linkChannel.dataset.title;
+
+        requestVideos(channelId, data => {
+
+            createList(data, title, true);
+
+        }, 12);
+    });
+};
+
 showMore.addEventListener('click', event => {
     event.preventDefault();
     navMenuMore.classList.toggle('nav-menu-more-show');
@@ -291,7 +352,7 @@ showMore.addEventListener('click', event => {
 
 formSearch.addEventListener('submit', event => {
     event.preventDefault();
-    console.log(formSearch.elements.search.value); //получаем даные из строки поиска
+    //console.log(formSearch.elements.search.value); //получаем даные из строки поиска
     const value = formSearch.elements.search.value
     requestSearch(value, data => {
 
@@ -317,8 +378,39 @@ navLinkLiked.forEach(elem => {
     elem.addEventListener('click', event => {
         event.preventDefault();
         requestliked(data => {
-            console.log(data);
             createList(data, 'Like', true);
         }, 9);
+    });
+});
+
+navLinkMusic.addEventListener('click', event => {
+    event.preventDefault();
+    requestMusic(data => {
+        createList(data, 'Популярная музыка', true);
+    }, 12);
+});
+
+navLinkGames.addEventListener('click', event => {
+    event.preventDefault();
+    requestGames(data => {
+        createList(data, 'Популярные игры', true);
+    }, 12);
+});
+
+navLinkSubscriptions.forEach(elem => {
+    elem.addEventListener('click', event => {
+        event.preventDefault();
+        requestSubscriptions(data => {
+            createList(data, 'Подписки', true, true);
+        }, 12);
+    });
+});
+
+navLinkTrending.forEach(elem => {
+    elem.addEventListener('click', event => {
+        event.preventDefault();
+        requestTrending(data => {
+            createList(data, 'Популярное видео', true);
+        }, 12);
     });
 });
