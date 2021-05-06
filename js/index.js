@@ -313,9 +313,9 @@ const requestliked = (callback, maxResults = 5) => {
 const loadScreen = () => {
     content.textContent = '';
 
-    requestVideos('UCVswRUcKC-M35RzgPRv8qUg', data => {
-
-        createList(data, 'GLO Academy');
+    requestVideos('UCn5wduCq2Mus0v85QZn9IaA', data => {
+        console.log(data);
+        createList(data, data[0].snippet.channelTitle);
 
         requestTrending(data => {
             createList(data, 'Популярное видео');
